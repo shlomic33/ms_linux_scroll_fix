@@ -67,7 +67,7 @@ index c6cd392..3397781 100644
  
 +	if((quirks & MS_HIGH_DPI_SCROLL_WHEEL) && hdev->type == HID_TYPE_USBMOUSE){
 +		hid_info(hdev, "Detected microsoft mouse with high dpi scroll wheel");
-+		report_buf = kmalloc(sizeof(buf), GFP_KERNEL);
++		report_buf = kmalloc(2, GFP_KERNEL);
 +		if(NULL == report_buf){
 +			hid_err(hdev, "Couldn't allocate data for buffer");
 +		} else{
