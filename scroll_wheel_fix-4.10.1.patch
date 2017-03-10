@@ -1,17 +1,17 @@
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 9845189..206a4f0 100644
+index 86c95d30ac80..e7de4912bfc4 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -729,6 +724,7 @@
- #define USB_DEVICE_ID_MS_TYPE_COVER_PRO_4_JP 0x07e9
- #define USB_DEVICE_ID_MS_TYPE_COVER_3    0x07de
+@@ -729,6 +729,7 @@
+ #define USB_DEVICE_ID_MS_TOUCH_COVER_2   0x07a7
+ #define USB_DEVICE_ID_MS_TYPE_COVER_2    0x07a9
  #define USB_DEVICE_ID_MS_POWER_COVER     0x07da
 +#define USB_DEVICE_ID_MS_SCULPT_ERGONOMIC 0x07a5
-
+ 
  #define USB_VENDOR_ID_MOJO		0x8282
  #define USB_DEVICE_ID_RETRO_ADAPTER	0x3201
 diff --git a/drivers/hid/hid-microsoft.c b/drivers/hid/hid-microsoft.c
-index c6cd392..3397781 100644
+index 96e7d3231d2f..74d0264d4e0b 100644
 --- a/drivers/hid/hid-microsoft.c
 +++ b/drivers/hid/hid-microsoft.c
 @@ -6,6 +6,7 @@
@@ -20,7 +20,7 @@ index c6cd392..3397781 100644
   *  Copyright (c) 2008 Jiri Slaby
 + *  Copyright (c) 2017 shlomi cohen <shlomic33@gmail.com>
   */
-
+ 
  /*
 @@ -19,7 +20,6 @@
  #include <linux/input.h>
@@ -28,7 +28,7 @@ index c6cd392..3397781 100644
  #include <linux/module.h>
 -
  #include "hid-ids.h"
-
+ 
  #define MS_HIDINPUT		0x01
 @@ -28,6 +28,11 @@
  #define MS_RDESC		0x08
@@ -39,7 +39,7 @@ index c6cd392..3397781 100644
 + * resolution multiplier to its minimum value.
 + */
 +#define MS_HIGH_DPI_SCROLL_WHEEL 0x40
-
+ 
  static __u8 *ms_report_fixup(struct hid_device *hdev, __u8 *rdesc,
  		unsigned int *rsize)
 @@ -223,6 +228,7 @@ static int ms_probe(struct hid_device *hdev, const struct hid_device_id *id)
@@ -47,25 +47,24 @@ index c6cd392..3397781 100644
  	unsigned long quirks = id->driver_data;
  	int ret;
 +	__u8 *report_buf = NULL;
-
+ 
  	hid_set_drvdata(hdev, (void *)quirks);
-
+ 
 @@ -235,6 +241,9 @@ static int ms_probe(struct hid_device *hdev, const struct hid_device_id *id)
  		goto err_free;
  	}
-
-+if ((quirks & MS_HIGH_DPI_SCROLL_WHEEL) && hdev->type != HID_TYPE_USBMOUSE)
-+	return -ENODEV;
+ 
++	if ((quirks & MS_HIGH_DPI_SCROLL_WHEEL) && hdev->type != HID_TYPE_USBMOUSE)
++		return -ENODEV;
 +
  	ret = hid_hw_start(hdev, HID_CONNECT_DEFAULT | ((quirks & MS_HIDINPUT) ?
  				HID_CONNECT_HIDINPUT_FORCE : 0));
  	if (ret) {
-@@ -242,6 +252,25 @@ static int ms_probe(struct hid_device *hdev, const struct hid_device_id *id)
+@@ -242,6 +251,23 @@ static int ms_probe(struct hid_device *hdev, const struct hid_device_id *id)
  		goto err_free;
  	}
-
-+	if ((quirks & MS_HIGH_DPI_SCROLL_WHEEL) &&
-+		hdev->type == HID_TYPE_USBMOUSE) {
+ 
++	if (quirks & MS_HIGH_DPI_SCROLL_WHEEL) {
 +		hid_info(hdev, "Detected microsoft mouse with high dpi scroll wheel");
 +		report_buf = kmalloc(2, GFP_KERNEL);
 +		if (report_buf == NULL) {
@@ -80,18 +79,17 @@ index c6cd392..3397781 100644
 +				hid_warn(hdev, "Failed turning off high dpi scroll wheel feature");
 +			kfree(report_buf);
 +		}
-+	} else
-+		return -ENODEV;
++	}
 +
  	return 0;
  err_free:
  	return ret;
-@@ -288,6 +317,8 @@ static const struct hid_device_id ms_devices[] = {
+@@ -278,6 +304,8 @@ static const struct hid_device_id ms_devices[] = {
  		.driver_data = MS_HIDINPUT },
  	{ HID_USB_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_COMFORT_KEYBOARD),
  		.driver_data = MS_ERGONOMY},
 +	{ HID_USB_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_SCULPT_ERGONOMIC),
 +		.driver_data = MS_HIGH_DPI_SCROLL_WHEEL},
-
+ 
  	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_MICROSOFT, USB_DEVICE_ID_MS_PRESENTER_8K_BT),
  		.driver_data = MS_PRESENTER },
