@@ -2,7 +2,7 @@ diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
 index 9845189..206a4f0 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -724,6 +724,7 @@
+@@ -729,6 +724,7 @@
  #define USB_DEVICE_ID_MS_TYPE_COVER_PRO_4_JP 0x07e9
  #define USB_DEVICE_ID_MS_TYPE_COVER_3    0x07de
  #define USB_DEVICE_ID_MS_POWER_COVER     0x07da
@@ -50,7 +50,7 @@ index c6cd392..3397781 100644
 
  	hid_set_drvdata(hdev, (void *)quirks);
 
-@@ -235,6 +241,10 @@ static int ms_probe(struct hid_device *hdev, const struct hid_device_id *id)
+@@ -235,6 +241,9 @@ static int ms_probe(struct hid_device *hdev, const struct hid_device_id *id)
  		goto err_free;
  	}
 
